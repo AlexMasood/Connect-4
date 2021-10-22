@@ -1,6 +1,7 @@
 from board import Board as b
 from ai import AI
 from player import Player
+import time
 """
 Implementation of reinforcement AI based on code created by MJeremy2017
 https://github.com/MJeremy2017/reinforcement-learning-implementation/blob/master/TicTacToe/tic-tac-toe.ipynb
@@ -16,10 +17,10 @@ class Game:
     Feed both AI based on winner or draw
     """
     def giveReward(self,boardObj):
-        if(boardObj.checkBoard(1)):
+        if(boardObj.checkBoard(boardObj.getBoard(),1)):
             self.p1.feedReward(1)
             self.p2.feedReward(0)
-        elif(boardObj.checkBoard(2)):
+        elif(boardObj.checkBoard(boardObj.getBoard(),2)):
             self.p1.feedReward(0)
             self.p2.feedReward(1)
         else:
@@ -35,8 +36,64 @@ class Game:
     """
     def aIVsAI(self, row, col, winNum, rounds = 100):
         for i in range(rounds):
-            if(i%1000 == 0):
-                print("rounds {}".format(i))
+            #if(i%10000 == 0):
+            #    print("rounds {}".format(i))
+            boardObj = b(row, col, winNum)
+            while (self.beingPlayed):
+                #check if can win
+                if(boardObj.nextWinMove(boardObj.getBoard(),1)[0]):
+                    boardObj.move(boardObj.nextWinMove(boardObj.getBoard(),1)[1],1)
+                    boardHash = boardObj.getHash()
+                    self.p1.addState(boardHash)
+                #prevent enemy win
+                elif(boardObj.nextWinMove(boardObj.getBoard(),2)[0]):
+                    boardObj.move(boardObj.nextWinMove(boardObj.getBoard(),2)[1],1)
+                    boardHash = boardObj.getHash()
+                    self.p1.addState(boardHash)
+                #ai
+                else:           
+                    positions = boardObj.getRemainingMoves(boardObj.getBoard())
+                    p1Action = self.p1.chooseAction(positions, boardObj, 1)
+                    boardObj.move(p1Action,1)
+                    boardHash = boardObj.getHash()
+                    self.p1.addState(boardHash)
+                #check win condition
+                if((boardObj.bitSolver(boardObj.getBoard(),1)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                    self.giveReward(boardObj)
+                    self.p1.reset()
+                    self.p2.reset()
+                    boardObj.reset()
+                    break
+                else:
+                    #check if can win
+                    if(boardObj.nextWinMove(boardObj.getBoard(),2)[0]):
+                        boardObj.move(boardObj.nextWinMove(boardObj.getBoard(),2)[1],2)
+                        boardHash = boardObj.getHash()
+                        self.p2.addState(boardHash)
+                    #prevent enemy win
+                    elif(boardObj.nextWinMove(boardObj.getBoard(),1)[0]):
+                        boardObj.move(boardObj.nextWinMove(boardObj.getBoard(),1)[1],2)
+                        boardHash = boardObj.getHash()
+                        self.p2.addState(boardHash)
+                    #ai
+                    else:
+                        positions = boardObj.getRemainingMoves(boardObj.getBoard())
+                        p2Action = self.p2.chooseAction(positions, boardObj, 2)
+                        boardObj.move(p2Action,2)
+                        boardHash = boardObj.getHash()
+                        self.p2.addState(boardHash)
+                    #check win condition
+                    if((boardObj.bitSolver(boardObj.getBoard(),2)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                        self.giveReward(boardObj)
+                        self.p1.reset()
+                        self.p2.reset()
+                        boardObj.reset()
+                        break
+
+    def aIVsAI2(self, row, col, winNum, rounds = 100):
+        for i in range(rounds):
+            #if(i%1000 == 0):
+            print("rounds {}".format(i))
             boardObj = b(row, col, winNum)
             while (self.beingPlayed):
                 positions = boardObj.getRemainingMoves(boardObj.getBoard())
@@ -64,7 +121,6 @@ class Game:
                         self.p2.reset()
                         boardObj.reset()
                         break
-    
     """
     Inputs of board rows, board columns, and win number
     Inputs of row column and win number
@@ -82,7 +138,7 @@ class Game:
             self.p1.addState(boardHash)
             boardObj.printBoard()
 
-            if(boardObj.checkBoard(1)):
+            if(boardObj.bitSolver(boardObj.getBoard(),1)):
                 print(self.p1.getName() + " has won")
                 boardObj.reset()
                 break
@@ -97,7 +153,7 @@ class Game:
                 boardHash = boardObj.getHash()
                 self.p2.addState(boardHash)
                 boardObj.printBoard()
-                if(boardObj.checkBoard(2)):
+                if(boardObj.bitSolver(boardObj.getBoard(),2)):
                     print(self.p2.getName() + " has won")
                     boardObj.reset()
                     break
@@ -119,7 +175,7 @@ class Game:
             p1Action = self.p1.chooseAction(positions, boardObj, 1)
             boardObj.move(p1Action,1)
             boardObj.printBoard()   
-            if(boardObj.checkBoard(1)):
+            if(boardObj.checkBoard(boardObj.getBoard(),1)):
                 print(self.p1.getName() + " has won")
                 self.beingPlayed = False
             else:
@@ -131,7 +187,7 @@ class Game:
                     p2Action = self.p2.chooseAction(positions, boardObj, 2)
                     boardObj.move(p2Action,2)
                     boardObj.printBoard()
-                    if(boardObj.checkBoard(2)):
+                    if(boardObj.checkBoard(boardObj.getBoard(),2)):
                         print(self.p2.getName() + " has won")
                         self.beingPlayed = False
 
@@ -181,6 +237,11 @@ def humanVsHumanGame(row,col,winNum):
     st = Game(p1,p2)
     st.humanVsHuman(row,col, winNum)
 
-#trainAI(100000,6,7,4)
-computerFirstGame(6,7,4)
+#trainAI(100,6,7,4)
+#computerFirstGame(6,7,4)
 #humanVsHumanGame(10,10,5)
+
+start = time.time()
+trainAI(100,6,7,4)
+end = time.time()
+print(end - start)
