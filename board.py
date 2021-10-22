@@ -2,7 +2,7 @@ import numpy as np
 class Board:
     
     def __init__(self,row = 6,col = 7,winNum = 4):
-        self.board = np.array([[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]])
+        self.board = np.zeros((row,col),dtype=int)
         
         self.col = col
         self.row = row
@@ -34,14 +34,14 @@ class Board:
     Creates a hash of the current board returns board hash
     """
     def getHash(self):
-        self.boardHash = str(self.board.reshape(self.row*self.col))
+        self.boardHash = str(self.board.ravel())
         return self.boardHash
     
     """
     resets all dates for training
     """
     def reset(self):
-        self.board = np.zeros((self.row,self.col))
+        self.board = np.zeros((self.row,self.col),dtype=int)
         self.boardHash = None
         self.isEnd = False
     """
@@ -169,4 +169,4 @@ class Board:
             if(boardInt&ans == ans):
                 return True
         return False
-    
+
