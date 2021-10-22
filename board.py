@@ -149,6 +149,11 @@ class Board:
     def openSpaces(self):
         return np.count_nonzero(self.board == 0)
     
+    """
+    converts the board to a binary number based on the current players moves,
+    uses an and binary operation on the board number and a precalculated list of winning solutions
+    returns true if board is solved, false otherwise.
+    """
     def bitSolver(self, board, player):
         tempBoard = board.copy()
         for row in tempBoard:
@@ -164,30 +169,4 @@ class Board:
             if(boardInt&ans == ans):
                 return True
         return False
-
-# solutionArray = np.array([15, 30, 60, 120, 
-#     1920, 3840, 7680, 15360, 
-#     245760, 491520, 983040, 1966080,
-#     31457280, 62914560, 125829120, 251658240,
-#     4026531840, 8053063680, 16106127360, 32212254720,
-#     515396075520, 1030792151040, 2061584302080, 4123168604160,
-#     17043520, 2181570560, 279241031680,
-#     8521760, 1090785280, 139620515840,
-#     4260880, 545392640, 69810257920,
-#     2130440, 272696320, 34905128960,
-#     16843009, 33686018, 67372036, 134744072,
-#     2155905152, 4311810304, 8623620608, 17247241216,
-#     275955859456, 551911718912, 1103823437824, 2207646875648])
-
-#int('0b1010', 2)
-#([[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,1,0,0,0,0],[0,1,0,0,0,0,0],[1,0,0,0,0,0,0]])
-# a = np.array([[0,0,0,0,0,0,1],[0,0,0,0,0,0,1],[0,0,0,0,0,0,1],[0,0,0,0,0,0,1],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]])
-# print(a)
-# a = a.ravel()
-# b = int("0b"+''.join(map(str, a)),2)
-# print(b)
-#  for ans in solutionArray:
-#      if (b&ans == ans):
-#          print("found it")
-        
     
