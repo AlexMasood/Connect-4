@@ -9,7 +9,7 @@ class Board:
         self.winNum = winNum
         self.boardHash = None
         self.isEnd = False
-        self.solutionArray = np.array([15, 30, 60, 120, 
+        self.solutionSet = {15, 30, 60, 120, 
             1920, 3840, 7680, 15360, 
             245760, 491520, 983040, 1966080,
             31457280, 62914560, 125829120, 251658240,
@@ -24,7 +24,7 @@ class Board:
             275955859456, 551911718912, 1103823437824, 2207646875648,
             2113665, 4227330, 8454660, 16909320, 33818640, 67637280, 135274560,
             270549120, 541098240, 1082196480, 2164392960, 4328785920, 8657571840, 17315143680,
-            34630287360, 69260574720, 138521149440, 277042298880, 554084597760, 1108169195520, 2216338391040])
+            34630287360, 69260574720, 138521149440, 277042298880, 554084597760, 1108169195520, 2216338391040}
         
 
     def getBoard(self):
@@ -82,7 +82,7 @@ class Board:
         for move in moves:
             possibleMove = board.copy()
             self.gravity(possibleMove,move,player)
-            if(self.bitSolver(possibleMove, player)):
+            if(self.binarySolver(possibleMove, player)):
                 return True, move
         return False, self.col #this is out of the range
 
@@ -154,7 +154,7 @@ class Board:
     uses an and binary operation on the board number and a precalculated list of winning solutions
     returns true if board is solved, false otherwise.
     """
-    def bitSolver(self, board, player):
+    def binarySolver(self, board, player):
         tempBoard = board.copy()
         for row in tempBoard:
             for index in range(0,len(row)):
@@ -165,8 +165,7 @@ class Board:
                     row[index] = 1
         singleArrayBoard = tempBoard.ravel()
         boardInt = int("0b"+''.join(map(str, singleArrayBoard)),2)
-        for ans in self.solutionArray:
+        for ans in self.solutionSet:
             if(boardInt&ans == ans):
                 return True
         return False
-
