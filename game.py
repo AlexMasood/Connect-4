@@ -17,10 +17,10 @@ class Game:
     Feed both AI based on winner or draw
     """
     def giveReward(self,boardObj):
-        if(boardObj.checkBoard(boardObj.getBoard(),1)):
+        if(boardObj.binarySolver(boardObj.getBoard(),1)):
             self.p1.feedReward(1)
             self.p2.feedReward(0)
-        elif(boardObj.checkBoard(boardObj.getBoard(),2)):
+        elif(boardObj.binarySolver(boardObj.getBoard(),1)):
             self.p1.feedReward(0)
             self.p2.feedReward(1)
         else:
@@ -36,8 +36,8 @@ class Game:
     """
     def aIVsAI(self, row, col, winNum, rounds = 100):
         for i in range(rounds):
-            if(i%1000 == 0):
-                print("rounds {}".format(i))
+        #    if(i%1000 == 0):
+        #        print("rounds {}".format(i))
             boardObj = b(row, col, winNum)
             while (self.beingPlayed):
                 #check if can win
@@ -58,7 +58,7 @@ class Game:
                     boardHash = boardObj.getHash()
                     self.p1.addState(boardHash)
                 #check win condition
-                if((boardObj.bitSolver(boardObj.getBoard(),1)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                if((boardObj.binarySolver(boardObj.getBoard(),1)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
                     self.giveReward(boardObj)
                     self.p1.reset()
                     self.p2.reset()
@@ -83,7 +83,7 @@ class Game:
                         boardHash = boardObj.getHash()
                         self.p2.addState(boardHash)
                     #check win condition
-                    if((boardObj.bitSolver(boardObj.getBoard(),2)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                    if((boardObj.binarySolver(boardObj.getBoard(),2)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
                         self.giveReward(boardObj)
                         self.p1.reset()
                         self.p2.reset()
@@ -92,8 +92,8 @@ class Game:
 
     def aIVsAI2(self, row, col, winNum, rounds = 100):
         for i in range(rounds):
-            if(i%1000 == 0):
-                print("rounds {}".format(i))
+            #if(i%1000 == 0):
+            #    print("rounds {}".format(i))
             boardObj = b(row, col, winNum)
             while (self.beingPlayed):
                 positions = boardObj.getRemainingMoves(boardObj.getBoard())
@@ -102,7 +102,7 @@ class Game:
                 boardHash = boardObj.getHash()
                 self.p1.addState(boardHash)
 
-                if((boardObj.bitSolver(boardObj.getBoard(),1)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                if((boardObj.binarySolver(boardObj.getBoard(),1)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
                     self.giveReward(boardObj)
                     self.p1.reset()
                     self.p2.reset()
@@ -115,7 +115,7 @@ class Game:
                     boardHash = boardObj.getHash()
                     self.p2.addState(boardHash)
 
-                    if((boardObj.bitSolver(boardObj.getBoard(),2)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                    if((boardObj.binarySolver(boardObj.getBoard(),2)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
                         self.giveReward(boardObj)
                         self.p1.reset()
                         self.p2.reset()
@@ -138,7 +138,7 @@ class Game:
             self.p1.addState(boardHash)
             boardObj.printBoard()
 
-            if(boardObj.bitSolver(boardObj.getBoard(),1)):
+            if(boardObj.binarySolver(boardObj.getBoard(),1)):
                 print(self.p1.getName() + " has won")
                 boardObj.reset()
                 break
@@ -153,7 +153,7 @@ class Game:
                 boardHash = boardObj.getHash()
                 self.p2.addState(boardHash)
                 boardObj.printBoard()
-                if(boardObj.bitSolver(boardObj.getBoard(),2)):
+                if(boardObj.binarySolver(boardObj.getBoard(),2)):
                     print(self.p2.getName() + " has won")
                     boardObj.reset()
                     break
@@ -196,7 +196,7 @@ class Game:
 Inputs of repeated training, board rows, board columns, and win number
 Sets up, trains, and saves the AI
 """
-def trainAI(repitions, row,col,winNum, continueAITraining = False):
+def trainAI(repitions, row,col,winNum, continueAITraining = False, savePolicy = True):
     p1 = AI("p1")
     p2 = AI("p2")
     if(continueAITraining):
@@ -206,8 +206,9 @@ def trainAI(repitions, row,col,winNum, continueAITraining = False):
     st = Game(p1, p2)
     print("training...")
     st.aIVsAI2(row,col, winNum, repitions)
-    p1.savePolicy(row,col,winNum)
-    p2.savePolicy(row,col,winNum)
+    if(savePolicy):
+        p1.savePolicy(row,col,winNum)
+        p2.savePolicy(row,col,winNum)
 
 """
 Inputs of board rows, board columns, and win number
@@ -246,7 +247,7 @@ def humanVsHumanGame(row,col,winNum):
 #humanVsHumanGame(10,10,5)
 
 start = time.time()
-#trainAI(100000,6,7,4,continueAITraining=True)
-computerFirstGame(6,7,4)
+trainAI(1000,6,7,4,continueAITraining=False, savePolicy=False)
+#computerFirstGame(6,7,4)
 end = time.time()
 print(end - start)
