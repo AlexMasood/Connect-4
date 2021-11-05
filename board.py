@@ -52,8 +52,8 @@ class Board:
     input  row number int, column number int, and current player int
     sets the move to the lowest row in the column
     """
-    def move(self,colNum,player):
-        self.gravity(self.getBoard(),colNum,player)
+    def move(self,colNum,player,playerBoard):
+        self.gravity(self.getBoard(),colNum,player,playerBoard)
         
 
     """
@@ -72,11 +72,13 @@ class Board:
     Raises the floor when there is no empty space
     sets the players counter once a space has been found
     """
-    def gravity(self,board, colNum, player):
+    def gravity(self,board, colNum, player,playerBoard):
         floor = self.row -1
         while (board[floor][colNum]!=0):
             floor-=1
+        playerBoard[floor][colNum] = 1 
         board[floor][colNum] = player
+        
 
 
     """
@@ -101,15 +103,19 @@ class Board:
     uses a binary and operation on the board number and a precalculated list of winning solutions
     returns true if board is solved, false otherwise.
     """
-    def binarySolver(self, board, player):
+    def binarySolver(self, board, player, joint = False):
+        #improvements:
+        #store board as two seperate binary numbers representing each player
+        #checks that require the entire board will use an or operation of both numbers
+        #this will remove the need to copy the board as well as iterate over the board to remove non player moves
         tempBoard = board.copy()
-        for row in tempBoard:
-            for index in range(0,len(row)):
-
-                if (row[index] != player):
-                    row[index] = 0
-                if (row[index] == 2):
-                    row[index] = 1
+        if(joint):
+            for row in tempBoard:
+                for index in range(0,len(row)):
+                    if (row[index] != player):
+                        row[index] = 0
+                    if (row[index] == 2):
+                        row[index] = 1
         singleArrayBoard = tempBoard.ravel()
         boardInt = int("0b"+''.join(map(str, singleArrayBoard)),2)
         for ans in self.solutionSet:

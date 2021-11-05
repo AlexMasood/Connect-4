@@ -38,7 +38,7 @@ class AI:
             valueMax = -999
             for p in positions:
                 nextBoard = currentBoard.copy()
-                currentBoardObj.gravity(nextBoard,p,symbol)
+                currentBoardObj.gravity(nextBoard,p,symbol,nextBoard)
                 nextBoardHash = self.getHash(nextBoard)
                 if (self.statesValues.get(nextBoardHash) is None):
                     value = 0
