@@ -133,3 +133,7 @@ class Board:
             if(boardInt&ans == ans):
                 return True
         return False
+
+#A = np.arange(4).reshape((2,2))
+#print(A)
+#print(np.flip(A,1))
