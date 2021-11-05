@@ -15,10 +15,6 @@ class AI:
         self.decayGamma = 0.9
         self.statesValues = {}
     
-    def getHash(self,board):
-        boardHash = str(board.reshape(len(board)*len(board[0])))
-        return boardHash
-    
     def getName(self):
         return self.name
     
@@ -28,25 +24,30 @@ class AI:
     each next potential legal move has its board created, hashed, and checked if in dictionary,If in dictionary value is set to value stored in the dictionary
     largest value is selected as its action 
     """
-    def chooseAction(self, positions, currentBoardObj, symbol):
+    def chooseAction(self, positions, currentBoardObj, symbol,boardTuple):
         #Element of randomness to help the AI explore new positions
         if (np.random.uniform(0,1) <= self.expRate):
-            idx = np.random.choice(len(positions))
-            action = positions[idx]
+            #idx = np.random.choice(len(positions))
+           action = random.choice(tuple(positions))
         else:
             currentBoard = currentBoardObj.getBoard()
             valueMax = -999
+            foundState = True
             for p in positions:
                 nextBoard = currentBoard.copy()
-                currentBoardObj.gravity(nextBoard,p,symbol,nextBoard)
-                nextBoardHash = self.getHash(nextBoard)
-                if (self.statesValues.get(nextBoardHash) is None):
+                boardTupleCopy = boardTuple.copy()
+                boardTupleCopy[symbol-1] = currentBoardObj.gravity(nextBoard,p,symbol,boardTupleCopy[symbol-1])
+                if (self.statesValues.get(tuple(boardTupleCopy)) is None):
                     value = 0
                 else:
-                    value = self.statesValues.get(nextBoardHash)
+                    value = self.statesValues.get(tuple(boardTupleCopy))
+                    foundState = False
                 if(value >= valueMax):
                     valueMax = value
                     action = p
+            if (foundState):
+                print("random move")
+                action = random.choice(tuple(positions))
         return action
     
     def addState(self,state):

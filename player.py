@@ -10,7 +10,7 @@ class Player:
     whilst row and column are not in the positions list repeats question
     add to board
     """
-    def chooseAction(self,positions,board,player):
+    def chooseAction(self,positions,board,player,currentBoardNum):
         print("It is player "+str(player)+"'s turn.")
 
         col = int(input("Enter column: "))

@@ -1,4 +1,5 @@
 import numpy as np
+import math
 class Board:
     
     def __init__(self,row = 6,col = 7,winNum = 4):
@@ -9,6 +10,7 @@ class Board:
         self.winNum = winNum
         self.boardHash = None
         self.isEnd = False
+        self.singleMoveDict = {}
         self.solutionSet = {15, 30, 60, 120, 
             1920, 3840, 7680, 15360, 
             245760, 491520, 983040, 1966080,
@@ -25,6 +27,8 @@ class Board:
             2113665, 4227330, 8454660, 16909320, 33818640, 67637280, 135274560,
             270549120, 541098240, 1082196480, 2164392960, 4328785920, 8657571840, 17315143680,
             34630287360, 69260574720, 138521149440, 277042298880, 554084597760, 1108169195520, 2216338391040}
+        self.populateSingleMoveDict()
+        
         
 
     def getBoard(self):
@@ -33,12 +37,15 @@ class Board:
     def printBoard(self):
         print(self.board)
         
-   
+    def populateSingleMoveDict(self):
+        for row in range(0,self.row):
+            for col in range(0,self.col):
+                self.singleMoveDict[(row,col)] = int(math.pow(2,((7*(5-row))+(6 - col)))) 
     """
     Creates a hash of the current board returns board hash
     """
-    def getHash(self):
-        self.boardHash = str(self.board.ravel())
+    def getHash(self,boardTuple):
+        self.boardHash = tuple(boardTuple)# str(self.board.ravel())
         return self.boardHash
     
     """
@@ -52,8 +59,8 @@ class Board:
     input  row number int, column number int, and current player int
     sets the move to the lowest row in the column
     """
-    def move(self,colNum,player,playerBoard):
-        self.gravity(self.getBoard(),colNum,player,playerBoard)
+    def move(self,colNum,player,playerBoardNum):
+        return self.gravity(self.getBoard(),colNum,player,playerBoardNum)
         
 
     """
@@ -72,12 +79,13 @@ class Board:
     Raises the floor when there is no empty space
     sets the players counter once a space has been found
     """
-    def gravity(self,board, colNum, player,playerBoard):
+    def gravity(self,board, colNum, player,playerBoardNum):
         floor = self.row -1
         while (board[floor][colNum]!=0):
-            floor-=1
-        playerBoard[floor][colNum] = 1 
+            floor-=1        
+        
         board[floor][colNum] = player
+        return  (playerBoardNum|self.singleMoveDict.get((floor,colNum)))
         
 
 
@@ -86,10 +94,10 @@ class Board:
     checks the top of each column, returning the list of empty space indexes
     """
     def getRemainingMoves(self,board):
-        remainingMoves = []
+        remainingMoves = set()
         for col in range(0,len(board[0])):
             if(board[0][col] == 0):
-                remainingMoves.append(col)
+                remainingMoves.add(col)
         return remainingMoves
     
     """
@@ -103,21 +111,24 @@ class Board:
     uses a binary and operation on the board number and a precalculated list of winning solutions
     returns true if board is solved, false otherwise.
     """
-    def binarySolver(self, board, player, joint = False):
-        #improvements:
-        #store board as two seperate binary numbers representing each player
-        #checks that require the entire board will use an or operation of both numbers
-        #this will remove the need to copy the board as well as iterate over the board to remove non player moves
+    def binarySolver(self, board, player):
         tempBoard = board.copy()
-        if(joint):
-            for row in tempBoard:
-                for index in range(0,len(row)):
-                    if (row[index] != player):
-                        row[index] = 0
-                    if (row[index] == 2):
-                        row[index] = 1
+        for row in tempBoard:
+            for index in range(0,len(row)):
+                if (row[index] != player):
+                    row[index] = 0
+                if (row[index] == 2):
+                    row[index] = 1
+    
         singleArrayBoard = tempBoard.ravel()
         boardInt = int("0b"+''.join(map(str, singleArrayBoard)),2)
+
+        for ans in self.solutionSet:
+            if(boardInt&ans == ans):
+                return True
+        return False
+    
+    def binaryCheck(self,boardInt):
         for ans in self.solutionSet:
             if(boardInt&ans == ans):
                 return True

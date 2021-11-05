@@ -18,10 +18,10 @@ class Game:
     Feed both AI based on winner or draw
     """
     def giveReward(self,boardObj):
-        if(boardObj.binarySolver(boardObj.getBoard(),1,joint = True)):
+        if(boardObj.binarySolver(boardObj.getBoard(),1)):
             self.p1.feedReward(1)
             self.p2.feedReward(0)
-        elif(boardObj.binarySolver(boardObj.getBoard(),2, joint = True)):
+        elif(boardObj.binarySolver(boardObj.getBoard(),2)):
             self.p1.feedReward(0)
             self.p2.feedReward(1)
         else:
@@ -36,20 +36,18 @@ class Game:
 
     """
     def aIVsAI(self, row, col, winNum, rounds = 100):
+        boardObj = b(row, col, winNum)
         for i in range(rounds):
-            #if(i%1000 == 0):
-            #    print("rounds {}".format(i))
-            boardObj = b(row, col, winNum)
-            p1Board  = np.zeros((row,col),dtype=int)
-            p2Board  = np.zeros((row,col),dtype=int)
+            if(i%1000 == 0):
+                print("rounds {}".format(i))
+            boardTuple = [0,0]
             while (self.beingPlayed):
                 positions = boardObj.getRemainingMoves(boardObj.getBoard())
-                p1Action = self.p1.chooseAction(positions, boardObj, 1)
-                boardObj.move(p1Action,1,p1Board)
-                boardHash = boardObj.getHash()
+                p1Action = self.p1.chooseAction(positions, boardObj, 1, boardTuple)
+                boardTuple[0] = boardObj.move(p1Action,1,boardTuple[0])
+                boardHash = boardObj.getHash(boardTuple)
                 self.p1.addState(boardHash)
-
-                if((boardObj.binarySolver(p1Board,1)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                if((boardObj.binaryCheck(boardTuple[0])) or (len(boardObj.getRemainingMoves(boardObj.getBoard())) == 0)):
                     self.giveReward(boardObj)
                     self.p1.reset()
                     self.p2.reset()
@@ -57,12 +55,11 @@ class Game:
                     break
                 else:
                     positions = boardObj.getRemainingMoves(boardObj.getBoard())
-                    p2Action = self.p2.chooseAction(positions, boardObj, 2)
-                    boardObj.move(p2Action,2,p2Board)
-                    boardHash = boardObj.getHash()
+                    p2Action = self.p2.chooseAction(positions, boardObj, 2,boardTuple)
+                    boardTuple[1] = boardObj.move(p2Action,2,boardTuple[1])
+                    boardHash = boardObj.getHash(boardTuple)
                     self.p2.addState(boardHash)
-
-                    if((boardObj.binarySolver(p2Board,2)) or not(boardObj.getRemainingMoves(boardObj.getBoard()))):
+                    if((boardObj.binaryCheck(boardTuple[1])) or (len(boardObj.getRemainingMoves(boardObj.getBoard())) == 0)):
                         self.giveReward(boardObj)
                         self.p1.reset()
                         self.p2.reset()
@@ -76,16 +73,18 @@ class Game:
     """
     def humanVsAI(self, row, col, winNum):
         boardObj = b(row, col, winNum)
+        boardTuple = [0,0]
         boardObj.printBoard()
         while (self.beingPlayed):
             positions = boardObj.getRemainingMoves(boardObj.getBoard())
-            p1Action = self.p1.chooseAction(positions, boardObj, 1)
-            boardObj.move(p1Action,1)
-            boardHash = boardObj.getHash()
+            p1Action = self.p1.chooseAction(positions, boardObj, 1, boardTuple)
+            boardTuple[0] = boardObj.move(p1Action,1,boardTuple[0])
+            boardHash = boardObj.getHash(boardTuple)
             self.p1.addState(boardHash)
             boardObj.printBoard()
 
             if(boardObj.binarySolver(boardObj.getBoard(),1)):
+                print(boardObj.getBoard())
                 print(self.p1.getName() + " has won")
                 boardObj.reset()
                 break
@@ -95,12 +94,13 @@ class Game:
                 break
             else:
                 positions = boardObj.getRemainingMoves(boardObj.getBoard())
-                p2Action = self.p2.chooseAction(positions, boardObj, 2)
-                boardObj.move(p2Action,2)
-                boardHash = boardObj.getHash()
+                p2Action = self.p2.chooseAction(positions, boardObj, 2, boardTuple)
+                boardTuple[1] = boardObj.move(p2Action,2,boardTuple[1])
+                boardHash = boardObj.getHash(boardTuple)
                 self.p2.addState(boardHash)
                 boardObj.printBoard()
                 if(boardObj.binarySolver(boardObj.getBoard(),2)):
+                    print(boardObj.getBoard())
                     print(self.p2.getName() + " has won")
                     boardObj.reset()
                     break
@@ -150,12 +150,17 @@ def trainAI(repitions, row,col,winNum, continueAITraining = False, savePolicy = 
         print("loaded in previous AI data")
         p1.loadPolicy(row, col, winNum, "p1")
         p2.loadPolicy(row, col, winNum, "p2")
+    else:
+        print("training new data")
     st = Game(p1, p2)
     print("training...")
     st.aIVsAI(row,col, winNum, repitions)
     if(savePolicy):
         p1.savePolicy(row,col,winNum)
         p2.savePolicy(row,col,winNum)
+        print("saved game")
+    else:
+        print("didnt save")
 
 """
 Inputs of board rows, board columns, and win number
@@ -189,12 +194,10 @@ def humanVsHumanGame(row,col,winNum):
     st = Game(p1,p2)
     st.humanVsHuman(row,col, winNum)
 
-#trainAI(100000,6,7,4)
-#computerFirstGame(6,7,4)
-#humanVsHumanGame(10,10,5)
 
 start = time.time()
-trainAI(1000,6,7,4,continueAITraining=False, savePolicy=False)
+trainAI(1000000,6,7,4,continueAITraining=True, savePolicy=True)
 #computerFirstGame(6,7,4)
+#humanFirstGame(6,7,4)
 end = time.time()
 print(end - start)
